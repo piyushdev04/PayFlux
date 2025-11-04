@@ -3,7 +3,7 @@ const statusBox = document.getElementById("statusBox");
 const statusText = document.getElementById("statusText");
 const historyBody = document.getElementById("historyBody");
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://payflux-backend.onrender.com/api";
 
 // Fetch and display transaction history
 async function fetchHistory() {
