@@ -3,9 +3,14 @@ const statusBox = document.getElementById("statusBox");
 const statusText = document.getElementById("statusText");
 const historyBody = document.getElementById("historyBody");
 
+const invoiceModal = document.getElementById("invoiceModal");
+const invoiceDetails = document.getElementById("invoiceDetails");
+const downloadInvoice = document.getElementById("downloadInvoice");
+const closeModal = document.getElementById("closeModal");
+
 const API_BASE = "https://payflux-backend.onrender.com/api";
 
-// Fetch and display transaction history
+// 🧾 Fetch and display transaction history
 async function fetchHistory() {
   try {
     const res = await fetch(`${API_BASE}/history`);
@@ -31,6 +36,10 @@ async function fetchHistory() {
         }">${tx.status}</td>
         <td>${new Date(tx.createdAt).toLocaleString()}</td>
       `;
+
+      // 👇 Click row to view invoice
+      row.addEventListener("click", () => openInvoice(tx));
+
       historyBody.appendChild(row);
     });
   } catch (err) {
@@ -39,7 +48,7 @@ async function fetchHistory() {
   }
 }
 
-// Simulate payment
+// 💳 Simulate payment
 async function simulatePayment() {
   const amount = document.getElementById("amount").value.trim();
   const method = document.getElementById("method").value.trim();
@@ -89,7 +98,7 @@ async function simulatePayment() {
   }
 }
 
-// Toast notification
+// ⚡ Toast notification
 function showToast(msg, type = "success") {
   const toast = document.createElement("div");
   toast.className = "toast";
@@ -99,7 +108,7 @@ function showToast(msg, type = "success") {
   setTimeout(() => toast.remove(), 3500);
 }
 
-// Dynamic subtype (UPI / Card / Bank)
+// 🧠 Dynamic subtype (UPI / Card / Bank)
 document.getElementById("method").addEventListener("change", (e) => {
   const val = e.target.value;
   document.getElementById("subtypeGroup")?.remove();
@@ -136,6 +145,57 @@ document.getElementById("method").addEventListener("change", (e) => {
     const methodGroup = document.getElementById("method").parentElement;
     methodGroup.insertAdjacentElement("afterend", subtypeGroup);
   }
+});
+
+// Open Invoice Modal
+function openInvoice(tx) {
+  invoiceModal.classList.remove("hidden");
+  invoiceDetails.innerHTML = `
+    <p><strong>Transaction ID:</strong> ${tx.transactionId || "N/A"}</p>
+    <p><strong>Amount:</strong> ₹${tx.amount}</p>
+    <p><strong>Method:</strong> ${tx.method}</p>
+    <p><strong>Gateway:</strong> ${tx.gateway?.toUpperCase() || "Auto"}</p>
+    <p><strong>Status:</strong> ${tx.status}</p>
+    <p><strong>Date:</strong> ${new Date(tx.createdAt).toLocaleString()}</p>
+    <p><strong>Recipient:</strong> ${tx.recipient || "Demo Merchant"}</p>
+    <p><strong>Description:</strong> ${tx.description || "N/A"}</p>
+  `;
+
+  downloadInvoice.onclick = () => generatePDF(tx);
+}
+
+// Download PDF invoice
+function generatePDF(tx) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFontSize(18);
+  doc.text("PayFlux Payment Invoice", 60, 20);
+
+  doc.setFontSize(12);
+  const lines = [
+    `Transaction ID: ${tx.transactionId || "N/A"}`,
+    `Amount: ₹${tx.amount}`,
+    `Method: ${tx.method}`,
+    `Gateway: ${tx.gateway?.toUpperCase() || "Auto"}`,
+    `Status: ${tx.status}`,
+    `Date: ${new Date(tx.createdAt).toLocaleString()}`,
+    `Recipient: ${tx.recipient || "Demo Merchant"}`,
+    `Description: ${tx.description || "N/A"}`,
+  ];
+
+  let y = 40;
+  lines.forEach((line) => {
+    doc.text(line, 20, y);
+    y += 10;
+  });
+
+  doc.save(`Invoice_${tx.transactionId || tx.id}.pdf`);
+}
+
+// Close modal
+closeModal.addEventListener("click", () => {
+  invoiceModal.classList.add("hidden");
 });
 
 payBtn.addEventListener("click", simulatePayment);
