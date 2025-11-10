@@ -1,6 +1,7 @@
 const API_BASE =
-  import.meta.env?.VITE_BACKEND_API_URL;
-const API_KEY = import.meta.env?.VITE_BACKEND_API_KEY;
+  import.meta.env?.VITE_BACKEND_API_URL ||
+  "https://payflux-backend.onrender.com/api";
+const API_KEY = import.meta.env?.VITE_BACKEND_API_KEY || "";
 
 // DOM Elements
 const payBtn = document.getElementById("payBtn");
