@@ -27,7 +27,9 @@ function sanitize(str) {
 async function fetchHistory() {
   try {
     const res = await fetch(`${API_BASE}/history`, {
-      headers: API_KEY ? { "x-api-key": API_KEY } : {},
+      headers: {
+        ...(API_KEY ? { "x-api-key": API_KEY } : {}),
+      },
     });
     const data = await res.json();
 
